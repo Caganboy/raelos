@@ -101,9 +101,10 @@
 </div>
 
 <script>
+  const TEAM_COLORS = {"Mystery": "#9d4edd", "Flare": "#ff6b6b", "Moon": "#4ea8de", "Tide": "#00b894", "Flower": "#fab1a0"};
+  const SHEET_URL = "https://docs.google.com/spreadsheets/d/1waiync8CXGUVGEq0wsWZuFjah4gKUGA7qpHiYVF5wb8/gviz/tq?tqx=out:json";
   let currentUser = null;
   let allRows = [];
-  let colIndex = {};
 
   function showTab(tabId, btn) {
     document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('visible'));
@@ -123,28 +124,18 @@
       .then(raw => {
         const json = JSON.parse(raw.substring(47).slice(0, -2));
         const rows = json.table.rows;
-        const headers = json.table.cols.map(c => c.label || "");
-        headers.forEach((h, i) => colIndex[h.toLowerCase()] = i);
-
         allRows = rows.map(r => r.c.map(c => c ? c.v : ""));
-        const user = allRows.find(r => (r[colIndex["raelocode"]] || "").toLowerCase() === code);
+        const user = allRows.find(r => (r[1] || "").toLowerCase() === code);
         if (!user) return alert("Invalid Raelo Code");
 
         currentUser = {
-          name: user[colIndex["name"]],
-          code: user[colIndex["raelocode"]],
-          team: user[colIndex["team"]],
-          votes: user[colIndex["votes"]],
-          items: user[colIndex["items"]] || "",
-          status: user[colIndex["status"]],
-          points: user[colIndex["points"]]
+          name: user[0], code: user[1], team: user[2], votes: user[3], items: user[4], status: user[5]
         };
         document.getElementById("nameField").textContent = currentUser.name;
         document.getElementById("teamField").textContent = currentUser.team;
         document.getElementById("votesField").textContent = currentUser.votes;
         document.getElementById("itemsField").textContent = currentUser.items;
         document.getElementById("statusField").textContent = currentUser.status;
-console.log("Logged in user data:", currentUser);
 
         document.getElementById("loginTab").style.display = "none";
         document.getElementById("app").style.display = "block";
@@ -158,9 +149,9 @@ console.log("Logged in user data:", currentUser);
   function renderTeam() {
     const list = document.getElementById("teamList");
     list.innerHTML = "";
-    const members = allRows.filter(r => r[colIndex["team"]] === currentUser.team);
+    const members = allRows.filter(r => r[2] === currentUser.team);
     members.forEach(m => {
-      list.innerHTML += "<div class='card' style='border-left: 5px solid " + (TEAM_COLORS[m[colIndex["team"]]] || "#fff") + "; padding-left: 10px;'><strong>" + m[colIndex["name"]] + "</strong><br>Points: " + m[colIndex["points"]] + " | Status: " + m[colIndex["status"]] + "</div>";
+      list.innerHTML += "<div class='card' style='border-left: 5px solid " + (TEAM_COLORS[m[2]] || "#fff") + "; padding-left: 10px;'><strong>" + m[0] + "</strong><br>Votes: " + m[3] + " | Status: " + m[5] + "</div>";
     });
   }
 
@@ -169,28 +160,28 @@ console.log("Logged in user data:", currentUser);
     list.innerHTML = "";
     const scores = {};
     allRows.forEach(r => {
-      const team = r[colIndex["team"]];
-      const points = parseInt(r[colIndex["points"]]) || 0;
-      scores[team] = (scores[team] || 0) + points;
+      const team = r[2];
+      const votes = parseInt(r[3]) || 0;
+      scores[team] = (scores[team] || 0) + votes;
     });
     const sorted = Object.entries(scores).sort((a,b) => b[1]-a[1]);
     sorted.forEach(([team, score], i) => {
-      list.innerHTML += "<div class='card' style='border-left: 5px solid " + (TEAM_COLORS[team] || "#fff") + "; padding-left: 10px;'>#" + (i+1) + " <strong>" + team + "</strong> – " + score + " points</div>";
+      list.innerHTML += "<div class='card' style='border-left: 5px solid " + (TEAM_COLORS[team] || "#fff") + "; padding-left: 10px;'>#" + (i+1) + " <strong>" + team + "</strong> – " + score + " votes</div>";
     });
   }
 
   function renderInventory() {
-    const list = document.getElementById("inventoryList");
-    const items = currentUser.items || "";
-    if (!items.trim()) {
-      list.innerHTML = "<em>No items in inventory.</em>";
-    } else {
-      const itemList = items.split(",").map(item => item.trim());
-      list.innerHTML = "<ul>" + itemList.map(i => "<li>" + i + "</li>").join("") + "</ul>";
-    }
+  const list = document.getElementById("inventoryList");
+  const items = currentUser.items || "";
+  if (!items.trim()) {
+    list.innerHTML = "<em>No items in inventory.</em>";
+  } else {
+    const itemList = items.split(",").map(item => item.trim());
+    list.innerHTML = "<ul>" + itemList.map(i => "<li>" + i + "</li>").join("") + "</ul>";
   }
+}
 
-  function logout() {
+function logout() {
     currentUser = null;
     document.getElementById("app").style.display = "none";
     document.getElementById("loginTab").style.display = "block";
