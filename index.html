@@ -89,97 +89,86 @@
 <div id="leaderboardList"></div>
 </div>
 </div>
+
 <script>
-  const TEAM_COLORS = {"Mystery": "#9d4edd", "Flare": "#ff6b6b", "Moon": "#4ea8de", "Tide": "#00b894", "Flower": "#fab1a0"};
-  const SHEET_URL = "https://docs.google.com/spreadsheets/d/1waiync8CXGUVGEq0wsWZuFjah4gKUGA7qpHiYVF5wb8/gviz/tq?tqx=out:json";
-  let currentUser = null;
-  let allRows = [];
+let currentUser = null;
+let allRows = [];
 
-  function showTab(tabId, btn) {
-    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('visible'));
-    document.getElementById(tabId).classList.add('visible');
-    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRESlbp9XlNZx481_QpFCBIVceUeKgWL_YzeMIF1KO2RvOZUGx5c7bcYodxd7DepyHKhM1qPQRSfK8g/pub?output=tsv";
 
-    if (tabId === 'team') renderTeam();
-    if (tabId === 'leaderboard') renderLeaderboard();
-    if (tabId === 'inventory') renderInventory();
-  }
-
-  function login() {
-    const code = document.getElementById("raeloCode").value.trim().toLowerCase();
-    fetch(SHEET_URL)
-      .then(res => res.text())
-      .then(raw => {
-        const json = JSON.parse(raw.substring(47).slice(0, -2));
-        const rows = json.table.rows;
-        allRows = rows.map(r => r.c.map(c => c ? c.v : ""));
-        const user = allRows.find(r => (r[1] || "").toLowerCase() === code);
-        if (!user) return alert("Invalid Raelo Code");
-
-        currentUser = {
-          name: user[0], code: user[1], team: user[2], votes: user[3], items: user[4], status: user[5]
-        };
-        document.getElementById("nameField").textContent = currentUser.name;
-        document.getElementById("teamField").textContent = currentUser.team;
-        document.getElementById("votesField").textContent = currentUser.votes;
-        document.getElementById("itemsField").textContent = currentUser.items;
-        document.getElementById("statusField").textContent = currentUser.status;
-
-        document.getElementById("loginTab").style.display = "none";
-        document.getElementById("app").style.display = "block";
-      })
-      .catch(err => {
-        console.error("Fetch failed", err);
-        alert("Error loading data.");
-      });
-  }
-
-  function renderTeam() {
-    const list = document.getElementById("teamList");
-    list.innerHTML = "";
-    const members = allRows.filter(r => r[2] === currentUser.team);
-    members.forEach(m => {
-      list.innerHTML += "<div class='card' style='border-left: 5px solid " + (TEAM_COLORS[m[2]] || "#fff") + "; padding-left: 10px;'><strong>" + m[0] + "</strong><br>Status: " + m[5] + "</div>";
-    });
-  }
-
-  function renderLeaderboard() {
-    const list = document.getElementById("leaderboardList");
-    list.innerHTML = "";
-    const scores = {};
-    allRows.forEach(r => {
-      const team = r[2];
-      const points = parseInt(r[3]) || 0;
-      scores[team] = (scores[team] || 0) + points;
-    });
-    const sorted = Object.entries(scores).sort((a,b) => b[1]-a[1]);
-    sorted.forEach(([team, score], i) => {
-      list.innerHTML += "<div class='card' style='border-left: 5px solid " + (TEAM_COLORS[team] || "#fff") + "; padding-left: 10px;'>#" + (i+1) + " <strong>" + team + "</strong> – " + score + " points</div>";
-    });
-  }
-
-  
-function renderInventory() {
-  const list = document.getElementById("inventoryList");
-  const items = currentUser.items || "";
-  if (!items.trim()) {
-    list.innerHTML = "<em>No items in inventory.</em>";
-    document.getElementById("debugUser").textContent = JSON.stringify(currentUser, null, 2);
-  } else {
-    const itemList = items.split(",").map(item => item.trim());
-    list.innerHTML = "<ul>" + itemList.map(i => "<li>" + i + "</li>").join("") + "</ul>";
-    document.getElementById("debugUser").textContent = JSON.stringify(currentUser, null, 2);
-  }
+function showTab(tabId, el) {
+  document.querySelectorAll(".tab").forEach(t => t.style.display = "none");
+  document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+  document.getElementById(tabId).style.display = "block";
+  el.classList.add("active");
+  if (tabId === "leaderboard") renderLeaderboard();
+  if (tabId === "inventory") renderInventory();
 }
+
+async function login() {
+  const code = document.getElementById("code").value.trim().toLowerCase();
+  const res = await fetch(SHEET_URL);
+  const text = await res.text();
+  const rows = text.trim().split("
+").map(row => row.split("	"));
+  const headers = rows[0];
+  const userIndex = rows.findIndex(r => r[1].toLowerCase() === code);
+  if (userIndex === -1) {
+    alert("RaeloCode not found.");
+    return;
+  }
+  const r = rows[userIndex];
+  currentUser = {
+    name: r[0],
+    code: r[1],
+    team: r[2],
+    points: r[3],
+    items: r[4],
+    status: r[5]
+  };
+  allRows = rows.slice(1); // skip headers
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("main").style.display = "block";
+  document.getElementById("welcomeName").textContent = currentUser.name;
+  document.getElementById("welcomeTeam").textContent = currentUser.team;
+  showTab("dashboard", document.querySelector("nav button"));
 }
 
 function logout() {
-    currentUser = null;
-    document.getElementById("app").style.display = "none";
-    document.getElementById("loginTab").style.display = "block";
-    document.getElementById("raeloCode").value = "";
+  currentUser = null;
+  document.getElementById("main").style.display = "none";
+  document.getElementById("loginScreen").style.display = "block";
+  document.getElementById("code").value = "";
+}
+
+function renderLeaderboard() {
+  const scores = {};
+  allRows.forEach(r => {
+    const team = r[2];
+    const points = parseInt(r[3]) || 0;
+    scores[team] = (scores[team] || 0) + points;
+  });
+  const leaderboard = Object.entries(scores)
+    .sort((a, b) => b[1] - a[1])
+    .map(([team, score], i) => `<li><strong>${i + 1}. ${team}</strong> – ${score} points</li>`)
+    .join("");
+  document.getElementById("leaderboardList").innerHTML = "<ul>" + leaderboard + "</ul>";
+}
+
+function renderInventory() {
+  const list = document.getElementById("inventoryList");
+  const debug = document.getElementById("debugUser");
+  const items = currentUser.items || "";
+  if (!items.trim()) {
+    list.innerHTML = "<em>No items in inventory.</em>";
+    debug.textContent = JSON.stringify(currentUser, null, 2);
+  } else {
+    const itemList = items.split(",").map(item => item.trim());
+    list.innerHTML = "<ul>" + itemList.map(i => "<li>" + i + "</li>").join("") + "</ul>";
+    debug.textContent = JSON.stringify(currentUser, null, 2);
   }
+}
 </script>
+
 </body>
 </html>
