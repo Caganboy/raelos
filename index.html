@@ -178,10 +178,15 @@
   if (!items.trim()) {
     list.innerHTML = "<em>No items in inventory.</em>";
   } else {
+<<<<<<< HEAD
     const itemList = items.split(",").map(item => item.trim());
+=======
+    const itemList = items.split(",").map(item => item.trim()).filter(item => item.length > 0);
+>>>>>>> 9621310d440e8623ef7ae36a8b7b671b17d5ecb4
     list.innerHTML = "<ul>" + itemList.map(i => "<li>• " + i + "</li>").join("") + "</ul>";
   }
 }
+
 
 function logout() {
     currentUser = null;
