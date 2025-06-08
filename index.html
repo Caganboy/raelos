@@ -176,14 +176,11 @@
   if (!items.trim()) {
     list.innerHTML = "<em>No items in inventory.</em>";
   } else {
-    const itemList = items.split(",").map(item => item.trim());
-    list.innerHTML = "<ul>" + itemList.map(i => {
-  const safe = encodeURIComponent(i);
-  const img = "https://source.unsplash.com/40x40/?" + safe;
-  return "<li><img src='" + img + "' style='width:24px;height:24px;margin-right:8px;vertical-align:middle;'><span>" + i + "</span></li>";
-}).join("") + "</ul>";
+    const itemList = items.split(",").map(item => item.trim()).filter(item => item.length > 0);
+    list.innerHTML = "<ul>" + itemList.map(i => "<li>• " + i + "</li>").join("") + "</ul>";
   }
 }
+
 
 function logout() {
     currentUser = null;
