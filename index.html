@@ -127,16 +127,8 @@
         headers.forEach((h, i) => colIndex[h.toLowerCase()] = i);
 
         allRows = rows.map(r => r.c.map(c => c ? c.v : ""));
-        const matchIndex = colIndex["raelocode"];
-        const foundCodes = allRows.map(r => (r[matchIndex] || "").toLowerCase().trim());
-        const user = allRows.find(r => (r[matchIndex] || "").toLowerCase().trim() === code);
-
-        if (!user) {
-          console.log("Tried RaeloCode:", code);
-          console.log("Available codes:", foundCodes);
-          alert("Login failed. We couldn’t find '" + code + "' in the RaeloCode column. Double-check for typos or extra spaces.");
-          return;
-        }
+        const user = allRows.find(r => (r[colIndex["raelocode"]] || "").toLowerCase() === code);
+        if (!user) return alert("Invalid Raelo Code");
 
         currentUser = {
           name: user[colIndex["name"]],
