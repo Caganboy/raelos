@@ -98,8 +98,16 @@
     </div>
   </div>
 
+<!-- ... Everything above remains the same until the last </script> tag ... -->
+
 <script>
-  const TEAM_COLORS = {"Mystery": "#9d4edd", "Flare": "#ff6b6b", "Moon": "#4ea8de", "Tide": "#00b894", "Flower": "#fab1a0"};
+  const TEAM_COLORS = {
+    "Mystery": "#9d4edd",
+    "Flare": "#ff6b6b",
+    "Moon": "#4ea8de",
+    "Tide": "#00b894",
+    "Flower": "#fab1a0"
+  };
   const SHEET_URL = "https://docs.google.com/spreadsheets/d/1waiync8CXGUVGEq0wsWZuFjah4gKUGA7qpHiYVF5wb8/gviz/tq?tqx=out:json";
   let currentUser = null;
   let allRows = [];
@@ -129,12 +137,7 @@
         currentUser = {
           name: user[0], code: user[1], team: user[2], votes: user[3], items: user[4], status: user[5]
         };
-        document.getElementById("nameField").textContent = currentUser.name;
-        document.getElementById("teamField").textContent = currentUser.team;
-        document.getElementById("votesField").textContent = currentUser.votes;
-        document.getElementById("itemsField").textContent = currentUser.items;
-        document.getElementById("statusField").textContent = currentUser.status;
-
+        updateUserDisplay();
         document.getElementById("loginTab").style.display = "none";
         document.getElementById("app").style.display = "block";
       })
@@ -142,6 +145,14 @@
         console.error("Fetch failed", err);
         alert("Error loading data.");
       });
+  }
+
+  function updateUserDisplay() {
+    document.getElementById("nameField").textContent = currentUser.name;
+    document.getElementById("teamField").textContent = currentUser.team;
+    document.getElementById("votesField").textContent = currentUser.votes;
+    document.getElementById("itemsField").textContent = currentUser.items;
+    document.getElementById("statusField").textContent = currentUser.status;
   }
 
   function renderTeam() {
@@ -162,36 +173,55 @@
       const votes = parseInt(r[3]) || 0;
       scores[team] = (scores[team] || 0) + votes;
     });
-    const sorted = Object.entries(scores).sort((a,b) => b[1]-a[1]);
+    const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
     sorted.forEach(([team, score], i) => {
-      list.innerHTML += "<div class='card' style='border-left: 5px solid " + (TEAM_COLORS[team] || "#fff") + "; padding-left: 10px;'>#" + (i+1) + " <strong>" + team + "</strong> – " + score + " votes</div>";
+      list.innerHTML += "<div class='card' style='border-left: 5px solid " + (TEAM_COLORS[team] || "#fff") + "; padding-left: 10px;'>#" + (i + 1) + " <strong>" + team + "</strong> – " + score + " votes</div>";
     });
   }
 
   function renderInventory() {
-  const list = document.getElementById("inventoryList");
-  const items = currentUser.items || "";
-  if (!items.trim()) {
-    list.innerHTML = "<em>No items in inventory.</em>";
-  } else {
-    const itemList = items.split(",").map(item => item.trim());
-    list.innerHTML = "<ul>" + itemList.map(i => "<li>" + i + "</li>").join("") + "</ul>";
+    const list = document.getElementById("inventoryList");
+    const items = currentUser.items || "";
+    if (!items.trim()) {
+      list.innerHTML = "<em>No items in inventory.</em>";
+    } else {
+      const itemList = items.split(",").map(item => item.trim());
+      list.innerHTML = "<ul>" + itemList.map(i => "<li>" + i + "</li>").join("") + "</ul>";
+    }
   }
-}
 
-function logout() {
+  function logout() {
     currentUser = null;
     document.getElementById("app").style.display = "none";
     document.getElementById("loginTab").style.display = "block";
     document.getElementById("raeloCode").value = "";
   }
 
-setInterval(() => {
-  if (currentUser) {
-    login(); // re-fetches and updates current user data
-  }
-}, 1000); // every 1 seconds
+  // Live updates every 15 seconds
+  setInterval(() => {
+    if (!currentUser) return;
 
+    fetch(SHEET_URL)
+      .then(res => res.text())
+      .then(raw => {
+        const json = JSON.parse(raw.substring(47).slice(0, -2));
+        const rows = json.table.rows;
+        allRows = rows.map(r => r.c.map(c => c ? c.v : ""));
+        const updated = allRows.find(r => (r[1] || "").toLowerCase() === currentUser.code);
+        if (updated) {
+          currentUser = {
+            name: updated[0], code: updated[1], team: updated[2],
+            votes: updated[3], items: updated[4], status: updated[5]
+          };
+          updateUserDisplay();
+
+          if (document.getElementById("team").classList.contains("visible")) renderTeam();
+          if (document.getElementById("leaderboard").classList.contains("visible")) renderLeaderboard();
+          if (document.getElementById("inventory").classList.contains("visible")) renderInventory();
+        }
+      })
+      .catch(console.error);
+  }, 1000);
 </script>
 
 </body>
