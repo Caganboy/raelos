@@ -176,9 +176,23 @@
     list.innerHTML = "<em>No items in inventory.</em>";
   } else {
     const itemList = items.split(",").map(item => item.trim());
-    list.innerHTML = "<ul>" + itemList.map(i => "<li>" + i + "</li>").join("") + "</ul>";
+    list.innerHTML = "<ul style='list-style:none; padding:0;'>";
+
+    itemList.forEach(item => {
+      const searchQuery = encodeURIComponent(item + " icon");
+      const imgURL = `https://source.unsplash.com/40x40/?${searchQuery}`;
+
+      list.innerHTML += `
+        <li style="display:flex; align-items:center; margin-bottom:6px;">
+          <img src="${imgURL}" alt="${item}" style="width:40px; height:40px; border-radius:6px; margin-right:10px;">
+          <span>${item}</span>
+        </li>`;
+    });
+
+    list.innerHTML += "</ul>";
   }
 }
+
 
 function logout() {
     currentUser = null;
