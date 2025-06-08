@@ -171,16 +171,40 @@
   }
 
   function renderInventory() {
+  console.log("Inside renderInventory function.");
   const list = document.getElementById("inventoryList");
   const debug = document.getElementById("debugUser");
+
+  // IMPORTANT: Check if the elements were found
+  if (!list) {
+    console.error("Error: inventoryList element not found!");
+    return; // Stop execution if the element isn't found
+  }
+  if (!debug) {
+    console.error("Error: debugUser element not found!");
+    return; // Stop execution if the element isn't found
+  }
+
+  if (!currentUser) {
+    console.error("currentUser is null in renderInventory.");
+    list.innerHTML = "<em>Error: User data not loaded.</em>";
+    debug.textContent = "Error: User data not loaded.";
+    return;
+  }
+
   const items = currentUser.items || "";
-  if (!items.trim()) { // Check if the trimmed string is empty
+  console.log("currentUser.items:", items);
+
+  if (!items.trim()) {
+    console.log("Items are empty or whitespace.");
     list.innerHTML = "<em>No items in inventory.</em>";
   } else {
+    console.log("Items found:", items);
     const itemList = items.split(",").map(item => item.trim());
     list.innerHTML = "<ul>" + itemList.map(i => "<li>" + i + "</li>").join("") + "</ul>";
   }
-  debug.textContent = JSON.stringify(currentUser, null, 2); // Debug always shows
+  debug.textContent = JSON.stringify(currentUser, null, 2);
+  console.log("Inventory rendering complete.");
 }
 
 function logout() {
