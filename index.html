@@ -87,12 +87,13 @@
   </div>
 
   <div id="leaderboard" class="tab">
-
   <div id="inventory" class="tab">
     <h2>🎒 Inventory</h2>
-    <div class="card">
-      <strong>Items:</strong>
-      <div id="inventoryList" style="margin-top: 10px;"></div>
+    <div class="card" id="inventoryList" style="margin-top: 10px;"></div>
+  </div>
+
+
+  
     </div>
   </div>
     <h2>🏆 Leaderboard</h2>
@@ -115,7 +116,7 @@
     if (tabId === 'team') renderTeam();
     if (tabId === 'leaderboard') renderLeaderboard();
     if (tabId === 'inventory') renderInventory();
-  }
+      }
 
   function login() {
     const code = document.getElementById("raeloCode").value.trim().toLowerCase();
@@ -170,19 +171,14 @@
     });
   }
 
-  function renderInventory() {
-  console.log("Rendering inventory for:", currentUser);
-
+  
+function renderInventory() {
   const list = document.getElementById("inventoryList");
-  const items = currentUser.items || "";
+  const items = currentUser && currentUser.items ? currentUser.items : "";
   if (!items.trim()) {
     list.innerHTML = "<em>No items in inventory.</em>";
   } else {
-<<<<<<< HEAD
-    const itemList = items.split(",").map(item => item.trim());
-=======
-    const itemList = items.split(",").map(item => item.trim()).filter(item => item.length > 0);
->>>>>>> 9621310d440e8623ef7ae36a8b7b671b17d5ecb4
+    const itemList = items.split(",").map(i => i.trim()).filter(i => i.length > 0);
     list.innerHTML = "<ul>" + itemList.map(i => "<li>• " + i + "</li>").join("") + "</ul>";
   }
 }
