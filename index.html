@@ -135,16 +135,16 @@
           code: user[colIndex["raelocode"]],
           team: user[colIndex["team"]],
           votes: user[colIndex["votes"]],
-          items: user[colIndex["items"]],
+          items: user[colIndex["items"]] || "",
           status: user[colIndex["status"]],
           points: user[colIndex["points"]]
         };
-
         document.getElementById("nameField").textContent = currentUser.name;
         document.getElementById("teamField").textContent = currentUser.team;
         document.getElementById("votesField").textContent = currentUser.votes;
         document.getElementById("itemsField").textContent = currentUser.items;
         document.getElementById("statusField").textContent = currentUser.status;
+console.log("Logged in user data:", currentUser);
 
         document.getElementById("loginTab").style.display = "none";
         document.getElementById("app").style.display = "block";
