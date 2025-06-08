@@ -159,17 +159,19 @@
     });
   }
 
-  function renderInventory() {
+  
+function renderInventory() {
   const list = document.getElementById("inventoryList");
   const items = currentUser.items || "";
   if (!items.trim()) {
     list.innerHTML = "<em>No items in inventory.</em>";
-  document.getElementById("debugUser").textContent = JSON.stringify(currentUser, null, 2);
+    document.getElementById("debugUser").textContent = JSON.stringify(currentUser, null, 2);
   } else {
     const itemList = items.split(",").map(item => item.trim());
     list.innerHTML = "<ul>" + itemList.map(i => "<li>" + i + "</li>").join("") + "</ul>";
-  document.getElementById("debugUser").textContent = JSON.stringify(currentUser, null, 2);
+    document.getElementById("debugUser").textContent = JSON.stringify(currentUser, null, 2);
   }
+}
 }
 
 function logout() {
