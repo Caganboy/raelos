@@ -82,6 +82,7 @@
 <div class="card">
 <strong>Items:</strong>
 <div id="inventoryList"></div>
+<pre id="debugUser" style="margin-top:1em; background:#f9f9f9; padding:10px; border:1px dashed #ccc;"></pre>
 </div>
 </div>
 <h2>🏆 Leaderboard</h2>
@@ -163,9 +164,11 @@
   const items = currentUser.items || "";
   if (!items.trim()) {
     list.innerHTML = "<em>No items in inventory.</em>";
+  document.getElementById("debugUser").textContent = JSON.stringify(currentUser, null, 2);
   } else {
     const itemList = items.split(",").map(item => item.trim());
     list.innerHTML = "<ul>" + itemList.map(i => "<li>" + i + "</li>").join("") + "</ul>";
+  document.getElementById("debugUser").textContent = JSON.stringify(currentUser, null, 2);
   }
 }
 
