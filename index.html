@@ -103,6 +103,7 @@
 <script>
   let currentUser = null;
   let allRows = [];
+  let colIndex = {};
 
   function showTab(tabId, btn) {
     document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('visible'));
@@ -122,19 +123,23 @@
       .then(raw => {
         const json = JSON.parse(raw.substring(47).slice(0, -2));
         const rows = json.table.rows;
+        const headers = json.table.cols.map(c => c.label || "");
+        headers.forEach((h, i) => colIndex[h.toLowerCase()] = i);
+
         allRows = rows.map(r => r.c.map(c => c ? c.v : ""));
-        const user = allRows.find(r => (r[1] || "").toLowerCase() === code);
+        const user = allRows.find(r => (r[colIndex["raelocode"]] || "").toLowerCase() === code);
         if (!user) return alert("Invalid Raelo Code");
 
         currentUser = {
-          name: user[0],
-          code: user[1],
-          team: user[2],
-          votes: user[3],
-          items: user[4],
-          status: user[5],
-          points: user[6]
+          name: user[colIndex["name"]],
+          code: user[colIndex["raelocode"]],
+          team: user[colIndex["team"]],
+          votes: user[colIndex["votes"]],
+          items: user[colIndex["items"]],
+          status: user[colIndex["status"]],
+          points: user[colIndex["points"]]
         };
+
         document.getElementById("nameField").textContent = currentUser.name;
         document.getElementById("teamField").textContent = currentUser.team;
         document.getElementById("votesField").textContent = currentUser.votes;
@@ -153,9 +158,9 @@
   function renderTeam() {
     const list = document.getElementById("teamList");
     list.innerHTML = "";
-    const members = allRows.filter(r => r[2] === currentUser.team);
+    const members = allRows.filter(r => r[colIndex["team"]] === currentUser.team);
     members.forEach(m => {
-      list.innerHTML += "<div class='card' style='border-left: 5px solid " + (TEAM_COLORS[m[2]] || "#fff") + "; padding-left: 10px;'><strong>" + m[0] + "</strong><br>Points: " + m[6] + " | Status: " + m[5] + "</div>";
+      list.innerHTML += "<div class='card' style='border-left: 5px solid " + (TEAM_COLORS[m[colIndex["team"]]] || "#fff") + "; padding-left: 10px;'><strong>" + m[colIndex["name"]] + "</strong><br>Points: " + m[colIndex["points"]] + " | Status: " + m[colIndex["status"]] + "</div>";
     });
   }
 
@@ -164,8 +169,8 @@
     list.innerHTML = "";
     const scores = {};
     allRows.forEach(r => {
-      const team = r[2];
-      const points = parseInt(r[6]) || 0;
+      const team = r[colIndex["team"]];
+      const points = parseInt(r[colIndex["points"]]) || 0;
       scores[team] = (scores[team] || 0) + points;
     });
     const sorted = Object.entries(scores).sort((a,b) => b[1]-a[1]);
