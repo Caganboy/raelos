@@ -1,10 +1,11 @@
 
 <!DOCTYPE html>
+
 <html>
 <head>
-  <title>Trial of the Raelos</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
+<title>Trial of the Raelos</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<style>
     body {
       font-family: sans-serif;
       background: #0d1b2a;
@@ -56,55 +57,37 @@
   </style>
 </head>
 <body>
-
-<div id="loginTab" class="tab visible">
-  <h2>🔐 Login</h2>
-  <input type="text" id="raeloCode" placeholder="Enter your Raelo Code">
-  <button onclick="login()">Login</button>
+<div class="tab visible" id="loginTab">
+<h2>🔐 Login</h2>
+<input id="raeloCode" placeholder="Enter your Raelo Code" type="text"/>
+<button onclick="login()">Login</button>
 </div>
-
 <div id="app" style="display:none;">
-  <nav>
-    <button onclick="showTab('dashboard', this)" class="active">🏝️ Dashboard</button>
-    <button onclick="showTab('team', this)">🧑‍🤝‍🧑 My Team</button>
-    <button onclick="showTab('leaderboard', this)">📊 Leaderboard</button>
-    <button onclick="showTab('inventory', this)">🎒 Inventory</button>
-    <button onclick="logout()">🔓 Log Out</button>
-    <button onclick="showTab('dashboard', this)" class="active">Dashboard</button>
-    <button onclick="showTab('team', this)">My Team</button>
-    <button onclick="showTab('leaderboard', this)">Leaderboard</button>
-    <button onclick="showTab('inventory', this)">🎒 Inventory</button>
-    <button onclick="logout()">🚪 Log Out</button>
-  </nav>
-
-  <div id="dashboard" class="tab visible">
-    <h2>🏝️ Dashboard</h2>
-    <div class="card"><strong>Name:</strong> <span id="nameField"></span></div>
-    <div class="card"><strong>Team:</strong> <span id="teamField" style="font-weight:bold;"></span></div>
-    <div class="card"><strong>Votes:</strong> <span id="votesField"></span></div>
-    <div class="card"><strong>Items:</strong> <span id="itemsField"></span></div>
-    <div class="card"><strong>Status:</strong> <span id="statusField"></span></div>
-  </div>
-
-  <div id="team" class="tab">
-    <h2>👥 My Team</h2>
-    <div id="teamList"></div>
-  </div>
-
-  <div id="leaderboard" class="tab">
-
-  <div id="inventory" class="tab">
-    <h2>🎒 Inventory</h2>
-    <div class="card">
-      <strong>Items:</strong>
-      <div id="inventoryList"></div>
-    </div>
-  </div>
-    <h2>🏆 Leaderboard</h2>
-    <div id="leaderboardList"></div>
-  </div>
+<nav><button class="active" onclick="showTab('dashboard', this)">🏝️ Dashboard</button><button onclick="showTab('team', this)">🧑‍🤝‍🧑 My Team</button><button onclick="showTab('leaderboard', this)">📊 Leaderboard</button><button onclick="showTab('inventory', this)">🎒 Inventory</button><button onclick="logout()">🔓 Log Out</button></nav>
+<div class="tab visible" id="dashboard">
+<h2>🏝️ Dashboard</h2>
+<div class="card"><strong>Name:</strong> <span id="nameField"></span></div>
+<div class="card"><strong>Team:</strong> <span id="teamField" style="font-weight:bold;"></span></div>
+<div class="card"><strong>Votes:</strong> <span id="votesField"></span></div>
+<div class="card"><strong>Items:</strong> <span id="itemsField"></span></div>
+<div class="card"><strong>Status:</strong> <span id="statusField"></span></div>
 </div>
-
+<div class="tab" id="team">
+<h2>👥 My Team</h2>
+<div id="teamList"></div>
+</div>
+<div class="tab" id="leaderboard">
+<div class="tab" id="inventory">
+<h2>🎒 Inventory</h2>
+<div class="card">
+<strong>Items:</strong>
+<div id="inventoryList"></div>
+</div>
+</div>
+<h2>🏆 Leaderboard</h2>
+<div id="leaderboardList"></div>
+</div>
+</div>
 <script>
   const TEAM_COLORS = {"Mystery": "#9d4edd", "Flare": "#ff6b6b", "Moon": "#4ea8de", "Tide": "#00b894", "Flower": "#fab1a0"};
   const SHEET_URL = "https://docs.google.com/spreadsheets/d/1waiync8CXGUVGEq0wsWZuFjah4gKUGA7qpHiYVF5wb8/gviz/tq?tqx=out:json";
@@ -193,6 +176,5 @@ function logout() {
     document.getElementById("raeloCode").value = "";
   }
 </script>
-
 </body>
 </html>
