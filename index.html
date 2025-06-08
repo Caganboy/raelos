@@ -180,7 +180,7 @@
 
     itemList.forEach(item => {
       const searchQuery = encodeURIComponent(item + " icon");
-      const imgURL = `https://external-content.duckduckgo.com/iu/?u=https://via.placeholder.com/40&f=1&nofb=1&q=${searchQuery}`;
+      const imgURL = `https://via.placeholder.com/40?text=${item[0].toUpperCase()}`;
 
       list.innerHTML += `
         <li style="display:flex; align-items:center; margin-bottom:6px;">
