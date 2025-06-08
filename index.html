@@ -1,93 +1,104 @@
 
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
 <head>
-<title>Trial of the Raelos</title>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Trial of the Raelos</title>
+  <style>
     body {
-      font-family: sans-serif;
-      background: #0d1b2a;
-      color: white;
+      font-family: 'Segoe UI', sans-serif;
       margin: 0;
       padding: 0;
+      background: #f4f4f4;
+    }
+    header {
+      background: #222;
+      color: white;
+      padding: 1em;
+      text-align: center;
     }
     nav {
       display: flex;
-      background: #1b263b;
       justify-content: space-around;
-      padding: 10px 0;
+      background: #ddd;
     }
     nav button {
-      background: none;
+      flex: 1;
+      padding: 1em;
       border: none;
-      color: white;
-      font-size: 16px;
+      background: #ddd;
       cursor: pointer;
     }
     nav button.active {
-      border-bottom: 2px solid #00bfff;
+      background: #bbb;
+      font-weight: bold;
     }
     .tab {
       display: none;
-      padding: 20px;
-    }
-    .visible {
-      display: block;
+      padding: 1em;
     }
     .card {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 10px;
-      margin-bottom: 10px;
+      background: white;
+      padding: 1em;
+      margin: 1em 0;
       border-radius: 8px;
     }
-    input, button {
-      padding: 10px;
-      border-radius: 5px;
-      border: none;
-      margin-bottom: 10px;
-      width: 100%;
+    #loginScreen {
+      padding: 2em;
+      text-align: center;
+    }
+    input[type="text"] {
+      padding: 0.5em;
+      width: 200px;
+      margin-bottom: 1em;
     }
     button {
-      background: #00bfff;
-      color: white;
-      font-weight: bold;
+      padding: 0.5em 1em;
     }
   </style>
 </head>
 <body>
-<div class="tab visible" id="loginTab">
-<h2>🔐 Login</h2>
-<input id="raeloCode" placeholder="Enter your Raelo Code" type="text"/>
-<button onclick="login()">Login</button>
+<div id="loginScreen">
+  <h1>Trial of the Raelos</h1>
+  <p>Enter your RaeloCode:</p>
+  <input type="text" id="code" placeholder="e.g. moon-fox75" />
+  <br/>
+  <button onclick="login()">Log In</button>
 </div>
-<div id="app" style="display:none;">
-<nav><button class="active" onclick="showTab('dashboard', this)">🏝️ Dashboard</button><button onclick="showTab('team', this)">🧑‍🤝‍🧑 My Team</button><button onclick="showTab('leaderboard', this)">📊 Leaderboard</button><button onclick="showTab('inventory', this)">🎒 Inventory</button><button onclick="logout()">🔓 Log Out</button></nav>
-<div class="tab visible" id="dashboard">
-<h2>🏝️ Dashboard</h2>
-<div class="card"><strong>Name:</strong> <span id="nameField"></span></div>
-<div class="card"><strong>Team:</strong> <span id="teamField" style="font-weight:bold;"></span></div>
-<div class="card"><strong>Votes:</strong> <span id="votesField"></span></div>
-<div class="card"><strong>Items:</strong> <span id="itemsField"></span></div>
-<div class="card"><strong>Status:</strong> <span id="statusField"></span></div>
-</div>
-<div class="tab" id="team">
-<h2>👥 My Team</h2>
-<div id="teamList"></div>
-</div>
-<div class="tab" id="leaderboard">
-<div class="tab" id="inventory">
-<h2>🎒 Inventory</h2>
-<div class="card">
-<strong>Items:</strong>
-<div id="inventoryList"></div>
-<pre id="debugUser" style="margin-top:1em; background:#f9f9f9; padding:10px; border:1px dashed #ccc;"></pre>
-</div>
-</div>
-<h2>🏆 Leaderboard</h2>
-<div id="leaderboardList"></div>
-</div>
+
+<div id="main" style="display:none">
+  <header>
+    <h2>Welcome, <span id="welcomeName"></span> of Team <span id="welcomeTeam"></span></h2>
+  </header>
+  <nav>
+    <button onclick="showTab('dashboard', this)" class="active">🏝️ Dashboard</button>
+    <button onclick="showTab('team', this)">🧑‍🤝‍🧑 My Team</button>
+    <button onclick="showTab('leaderboard', this)">📊 Leaderboard</button>
+    <button onclick="showTab('inventory', this)">🎒 Inventory</button>
+    <button onclick="logout()">🔓 Log Out</button>
+  </nav>
+
+  <div id="dashboard" class="tab" style="display:block">
+    <h2>🏝️ Dashboard</h2>
+    <div class="card">This is your main dashboard.</div>
+  </div>
+  <div id="team" class="tab">
+    <h2>🧑‍🤝‍🧑 My Team</h2>
+    <div class="card">Coming soon: Team members list</div>
+  </div>
+  <div id="leaderboard" class="tab">
+    <h2>📊 Team Leaderboard</h2>
+    <div class="card" id="leaderboardList"></div>
+  </div>
+  <div id="inventory" class="tab">
+    <h2>🎒 Inventory</h2>
+    <div class="card">
+      <strong>Items:</strong>
+      <div id="inventoryList"></div>
+      <pre id="debugUser" style="margin-top:1em; background:#f9f9f9; padding:10px; border:1px dashed #ccc;"></pre>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -109,9 +120,7 @@ async function login() {
   const code = document.getElementById("code").value.trim().toLowerCase();
   const res = await fetch(SHEET_URL);
   const text = await res.text();
-  const rows = text.trim().split("
-").map(row => row.split("	"));
-  const headers = rows[0];
+  const rows = text.trim().split("\n").map(row => row.split("\t"));
   const userIndex = rows.findIndex(r => r[1].toLowerCase() === code);
   if (userIndex === -1) {
     alert("RaeloCode not found.");
@@ -126,7 +135,7 @@ async function login() {
     items: r[4],
     status: r[5]
   };
-  allRows = rows.slice(1); // skip headers
+  allRows = rows.slice(1);
   document.getElementById("loginScreen").style.display = "none";
   document.getElementById("main").style.display = "block";
   document.getElementById("welcomeName").textContent = currentUser.name;
@@ -169,6 +178,5 @@ function renderInventory() {
   }
 }
 </script>
-
 </body>
 </html>
