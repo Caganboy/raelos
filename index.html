@@ -1,0 +1,180 @@
+
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>Trial of the Raelos</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<style>
+    body {
+      font-family: sans-serif;
+      background: #0d1b2a;
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+    nav {
+      display: flex;
+      background: #1b263b;
+      justify-content: space-around;
+      padding: 10px 0;
+    }
+    nav button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    nav button.active {
+      border-bottom: 2px solid #00bfff;
+    }
+    .tab {
+      display: none;
+      padding: 20px;
+    }
+    .visible {
+      display: block;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+    }
+    input, button {
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+    button {
+      background: #00bfff;
+      color: white;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+<div class="tab visible" id="loginTab">
+<h2>🔐 Login</h2>
+<input id="raeloCode" placeholder="Enter your Raelo Code" type="text"/>
+<button onclick="login()">Login</button>
+</div>
+<div id="app" style="display:none;">
+<nav>
+<button class="active" onclick="showTab('dashboard', this)">🏝️ Dashboard</button>
+<button onclick="showTab('team', this)">👥 My Team</button>
+<button onclick="showTab('leaderboard', this)">🏆 Leaderboard</button>
+<button onclick="showTab('inventory', this)">🎒 Inventory</button>
+<button onclick="logout()">🚪 Log Out</button>
+</nav>
+<div class="tab visible" id="dashboard">
+<h2>🏝️ Dashboard</h2>
+<div class="card"><strong>Name:</strong> <span id="nameField"></span></div>
+<div class="card"><strong>Team:</strong> <span id="teamField" style="font-weight:bold;"></span></div>
+<div class="card"><strong>Votes:</strong> <span id="votesField"></span></div>
+<div class="card"><strong>Items:</strong> <span id="itemsField"></span></div>
+<div class="card"><strong>Status:</strong> <span id="statusField"></span></div>
+</div><div class="tab" id="team">
+<h2>👥 My Team</h2>
+<div id="teamList"></div>
+</div><div class="tab" id="leaderboard">
+</div><div class="tab" id="inventory">
+<h2>🎒 Inventory</h2>
+<div class="card" id="inventoryList" style="margin-top: 10px;"></div>
+</div></div>
+<div id="leaderboardList"></div>
+<script>
+  const TEAM_COLORS = {"Mystery": "#9d4edd", "Flare": "#ff6b6b", "Moon": "#4ea8de", "Tide": "#00b894", "Flower": "#fab1a0"};
+  const SHEET_URL = "https://docs.google.com/spreadsheets/d/1waiync8CXGUVGEq0wsWZuFjah4gKUGA7qpHiYVF5wb8/gviz/tq?tqx=out:json";
+  let currentUser = null;
+  let allRows = [];
+
+  function showTab(tabId, btn) {
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('visible'));
+    document.getElementById(tabId).classList.add('visible');
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    if (tabId === 'team') renderTeam();
+    if (tabId === 'leaderboard') renderLeaderboard();
+    if (tabId === 'inventory') renderInventory();
+      }
+
+  function login() {
+    const code = document.getElementById("raeloCode").value.trim().toLowerCase();
+    fetch(SHEET_URL)
+      .then(res => res.text())
+      .then(raw => {
+        const json = JSON.parse(raw.substring(47).slice(0, -2));
+        const rows = json.table.rows;
+        allRows = rows.map(r => r.c.map(c => c ? c.v : ""));
+        const user = allRows.find(r => (r[1] || "").toLowerCase() === code);
+        if (!user) return alert("Invalid Raelo Code");
+
+        currentUser = {
+          name: user[0], code: user[1], team: user[2], votes: user[3], items: user[4], status: user[5]
+        };
+        document.getElementById("nameField").textContent = currentUser.name;
+        document.getElementById("teamField").textContent = currentUser.team;
+        document.getElementById("votesField").textContent = currentUser.votes;
+        document.getElementById("itemsField").textContent = currentUser.items;
+        document.getElementById("statusField").textContent = currentUser.status;
+
+        document.getElementById("loginTab").style.display = "none";
+        document.getElementById("app").style.display = "block";
+      })
+      .catch(err => {
+        console.error("Fetch failed", err);
+        alert("Error loading data.");
+      });
+  }
+
+  function renderTeam() {
+    const list = document.getElementById("teamList");
+    list.innerHTML = "";
+    const members = allRows.filter(r => r[2] === currentUser.team);
+    members.forEach(m => {
+      list.innerHTML += "<div class='card' style='border-left: 5px solid " + (TEAM_COLORS[m[2]] || "#fff") + "; padding-left: 10px;'><strong>" + m[0] + "</strong><br>Votes: " + m[3] + " | Status: " + m[5] + "</div>";
+    });
+  }
+
+  function renderLeaderboard() {
+    const list = document.getElementById("leaderboardList");
+    list.innerHTML = "";
+    const scores = {};
+    allRows.forEach(r => {
+      const team = r[2];
+      const votes = parseInt(r[3]) || 0;
+      scores[team] = (scores[team] || 0) + votes;
+    });
+    const sorted = Object.entries(scores).sort((a,b) => b[1]-a[1]);
+    sorted.forEach(([team, score], i) => {
+      list.innerHTML += "<div class='card' style='border-left: 5px solid " + (TEAM_COLORS[team] || "#fff") + "; padding-left: 10px;'>#" + (i+1) + " <strong>" + team + "</strong> – " + score + " votes</div>";
+    });
+  }
+
+  
+function renderInventory() {
+  const list = document.getElementById("inventoryList");
+  const items = currentUser && currentUser.items ? currentUser.items : "";
+  if (!items.trim()) {
+    list.innerHTML = "<em>No items in inventory.</em>";
+  } else {
+    const itemList = items.split(",").map(i => i.trim()).filter(i => i.length > 0);
+    list.innerHTML = "<ul>" + itemList.map(i => "<li>• " + i + "</li>").join("") + "</ul>";
+  }
+}
+
+
+function logout() {
+    currentUser = null;
+    document.getElementById("app").style.display = "none";
+    document.getElementById("loginTab").style.display = "block";
+    document.getElementById("raeloCode").value = "";
+  }
+</script>
+</body>
+</html>
