@@ -185,6 +185,13 @@ function logout() {
     document.getElementById("loginTab").style.display = "block";
     document.getElementById("raeloCode").value = "";
   }
+
+setInterval(() => {
+  if (currentUser) {
+    login(); // re-fetches and updates current user data
+  }
+}, 15000); // every 15 seconds
+
 </script>
 
 </body>
