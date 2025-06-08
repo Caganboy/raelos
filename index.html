@@ -151,7 +151,7 @@
     list.innerHTML = "";
     const members = allRows.filter(r => r[2] === currentUser.team);
     members.forEach(m => {
-      list.innerHTML += "<div class='card' style='border-left: 5px solid " + (TEAM_COLORS[m[2]] || "#fff") + "; padding-left: 10px;'><strong>" + m[0] + "</strong><br>Votes: " + m[3] + " | Status: " + m[5] + "</div>";
+      list.innerHTML += "<div class='card' style='border-left: 5px solid " + (TEAM_COLORS[m[2]] || "#fff") + "; padding-left: 10px;'><strong>" + m[0] + "</strong><br>Points: " + m[6] + " | Status: " + m[5] + "</div>";
     });
   }
 
@@ -161,12 +161,12 @@
     const scores = {};
     allRows.forEach(r => {
       const team = r[2];
-      const votes = parseInt(r[3]) || 0;
-      scores[team] = (scores[team] || 0) + votes;
+      const points = parseInt(r[6]) || 0;
+      scores[team] = (scores[team] || 0) + points;
     });
     const sorted = Object.entries(scores).sort((a,b) => b[1]-a[1]);
     sorted.forEach(([team, score], i) => {
-      list.innerHTML += "<div class='card' style='border-left: 5px solid " + (TEAM_COLORS[team] || "#fff") + "; padding-left: 10px;'>#" + (i+1) + " <strong>" + team + "</strong> – " + score + " votes</div>";
+      list.innerHTML += "<div class='card' style='border-left: 5px solid " + (TEAM_COLORS[team] || "#fff") + "; padding-left: 10px;'>#" + (i+1) + " <strong>" + team + "</strong> – " + score + " points</div>";
     });
   }
 
