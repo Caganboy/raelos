@@ -171,14 +171,16 @@
   }
 
   function renderInventory() {
-  const list = document.getElementById("inventoryList");
-  const items = currentUser.items || "";
-  if (!items.trim()) {
-    list.innerHTML = "<em>No items in inventory.</em>";
-  } else {
-    const itemList = items.split(",").map(item => item.trim());
-    list.innerHTML = "<ul>" + itemList.map(i => "<li>" + i + "</li>").join("") + "</ul>";
-  }
+  const list = document.getElementById("inventoryList");
+  const debug = document.getElementById("debugUser");
+  const items = currentUser.items || "";
+  if (!items.trim()) { // Check if the trimmed string is empty
+    list.innerHTML = "<em>No items in inventory.</em>";
+  } else {
+    const itemList = items.split(",").map(item => item.trim());
+    list.innerHTML = "<ul>" + itemList.map(i => "<li>" + i + "</li>").join("") + "</ul>";
+  }
+  debug.textContent = JSON.stringify(currentUser, null, 2); // Debug always shows
 }
 
 function logout() {
