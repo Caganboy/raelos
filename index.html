@@ -111,9 +111,19 @@ function showTab(tabId, el) {
   document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
   document.getElementById(tabId).style.display = "block";
   el.classList.add("active");
-  if (tabId === "leaderboard") renderLeaderboard();
-  if (tabId === "inventory") renderInventory();
+
+  if (tabId === "leaderboard") {
+    renderLeaderboard();
+  }
+  if (tabId === "inventory") {
+    // Add a small delay for the DOM to render the elements visible
+    setTimeout(() => {
+      renderInventory();
+    }, 50); // 50 milliseconds should be enough, adjust if needed
+  }
 }
+
+// ... rest of your script, including the renderInventory function you already have ...
 
 async function login() {
   const code = document.getElementById("code").value.trim().toLowerCase();
