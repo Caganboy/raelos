@@ -1,0 +1,109 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Trial of the Raelos – Connected to Live Sheet</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #0a2342;
+      color: white;
+      padding: 20px;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 20px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      border: none;
+    }
+    button {
+      padding: 10px;
+      width: 100%;
+      background: #00bfff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>🔐 Login</h2>
+  <input type="text" id="raeloCode" placeholder="Enter your Raelo Code">
+  <button onclick="login()">Enter</button>
+
+  <div id="playerInfo" style="display:none;" class="card">
+    <p><strong>Name:</strong> <span id="nameField"></span></p>
+    <p><strong>Team:</strong> <span id="teamField"></span></p>
+    <p><strong>Votes:</strong> <span id="votesField"></span></p>
+    <p><strong>Items:</strong> <span id="itemsField"></span></p>
+    <p><strong>Status:</strong> <span id="statusField"></span></p>
+    <button style="background:#ff4d4d;" onclick="logout()">Log Out</button>
+  </div>
+</div>
+
+<script>
+  const SHEET_URL = "https://docs.google.com/spreadsheets/d/1waiync8CXGUVGEq0wsWZuFjah4gKUGA7qpHiYVF5wb8/gviz/tq?tqx=out:json";
+
+  function login() {
+    const code = document.getElementById("raeloCode").value.trim().toLowerCase();
+    if (!code) return alert("Enter a Raelo Code");
+
+    fetch(SHEET_URL)
+      .then(res => res.text())
+      .then(raw => {
+        const json = JSON.parse(raw.substring(47).slice(0, -2));
+        const rows = json.table.rows;
+        let found = false;
+
+        for (let row of rows) {
+          const rowData = row.c.map(cell => cell ? cell.v : "");
+          const [name, raeloCode, team, votes, items, status] = rowData;
+
+          if (raeloCode.toLowerCase() === code) {
+            document.getElementById("nameField").textContent = name;
+            document.getElementById("teamField").textContent = team;
+            document.getElementById("votesField").textContent = votes;
+            document.getElementById("itemsField").textContent = items;
+            document.getElementById("statusField").textContent = status;
+            document.getElementById("playerInfo").style.display = "block";
+            found = true;
+            break;
+          }
+        }
+
+        if (!found) {
+          alert("No player found with that Raelo Code.");
+        }
+      })
+      .catch(err => {
+        console.error("Failed to fetch sheet", err);
+        alert("Error loading data. Make sure your sheet is published to the web.");
+      });
+  }
+
+  function logout() {
+    document.getElementById("playerInfo").style.display = "none";
+    document.getElementById("raeloCode").value = "";
+  }
+</script>
+
+</body>
+</html>
